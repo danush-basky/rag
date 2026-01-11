@@ -47,7 +47,7 @@ services:
       LANGFUSE_HOST: http://localhost:3000
       LANGFUSE_DEBUG: false
 
-      DB_HOST: localhost
+      DB_HOST: ${RAG_DB_HOST}
       DB_PORT: 5432
       DB_NAME: ${RAG_DB_NAME}
       DB_USER: ${RAG_DB_USERNAME}
