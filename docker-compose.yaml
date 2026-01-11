@@ -42,20 +42,20 @@ services:
       MAX_TOKENS: 4096
       TEMPERATURE: 0.7
 
-      LANGFUSE_PUBLIC_KEY: pk-lf-8c348c27-426c-4417-a6b0-5a65592d8c5a
-      LANGFUSE_SECRET_KEY: sk-lf-81356934-4d1c-4176-ab3f-976110ddd4c2
+      LANGFUSE_PUBLIC_KEY: test
+      LANGFUSE_SECRET_KEY: test
       LANGFUSE_HOST: http://localhost:3000
       LANGFUSE_DEBUG: false
 
       DB_HOST: localhost
       DB_PORT: 5432
-      DB_NAME: rag_database
-      DB_USER: postgres
-      DB_PASSWORD: admin
-      SUMMARY_TABLE: ${SUMMARY_TABLE}
-      HISTORY_TABLE: ${HISTORY_TABLE}
+      DB_NAME: ${RAG_DB_NAME}
+      DB_USER: ${RAG_DB_USERNAME}
+      DB_PASSWORD: ${RAG_DB_PASSWORD}
+      SUMMARY_TABLE: chat_session_summaries
+      HISTORY_TABLE: chat_messages_history
       DB_MIN_CONNECTIONS: 2
-      DB_MAX_CONNECTIONS: 10
+      DB_MAX_CONNECTIONS: 5
 
       MAX_HISTORY_MESSAGES: 10
       SUMMARY_INTERVAL: 5  
@@ -63,7 +63,7 @@ services:
       SUMMARY_MAX_TOKENS: 512
 
       RAG_PORT: 4545
-      RAG_GUNICORN_WORKERS: 2
+      RAG_GUNICORN_WORKERS: 1
     
     ipc: host
     ulimits:
