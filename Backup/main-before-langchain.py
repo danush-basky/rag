@@ -13,7 +13,7 @@ import time
 from functools import wraps
 
 # Langfuse imports
-from langfuse import get_client, observe
+# from langfuse import get_client, observe
 from langfuse.openai import openai
 
 # LangChain and Utils
@@ -23,7 +23,7 @@ from Utils.models import ChatRequest, SearchRequest, SearchResponse, SearchResul
 
 
 # Initialize Langfuse client
-langfuse = get_client()
+# langfuse = get_client()
 
 
 # Create logs directory if it doesn't exist
@@ -102,14 +102,14 @@ async def lifespan(app: FastAPI):
     logger.info(f"  - Reranker URL: {config.RERANKER_URL}")
     
     # Check Langfuse connection
-    try:
-        if langfuse.auth_check():
-            logger.info(f"✓ Connected to Langfuse at {config.LANGFUSE_HOST}")
-        else:
-            logger.warning("⚠ Langfuse authentication failed - check credentials")
-    except Exception as e:
-        logger.error(f"✗ Langfuse connection failed: {e}")
-        logger.warning("⚠ Continuing without Langfuse tracing")
+    # try:
+    #     if langfuse.auth_check():
+    #         logger.info(f"✓ Connected to Langfuse at {config.LANGFUSE_HOST}")
+    #     else:
+    #         logger.warning("⚠ Langfuse authentication failed - check credentials")
+    # except Exception as e:
+    #     logger.error(f"✗ Langfuse connection failed: {e}")
+    #     logger.warning("⚠ Continuing without Langfuse tracing")
     
     # Check Elasticsearch connection
     try:
@@ -135,12 +135,12 @@ async def lifespan(app: FastAPI):
     yield
     
     # Shutdown
-    logger.info("Flushing Langfuse traces...")
-    try:
-        langfuse.flush()
-        logger.info("✓ Langfuse traces flushed")
-    except Exception as e:
-        logger.error(f"Error flushing Langfuse: {e}")
+    # logger.info("Flushing Langfuse traces...")
+    # try:
+    #     langfuse.flush()
+    #     logger.info("✓ Langfuse traces flushed")
+    # except Exception as e:
+    #     logger.error(f"Error flushing Langfuse: {e}")
     
     logger.info("Shutting down RAG API service...")
     es_client.close()
@@ -173,7 +173,7 @@ async def log_request_time(request: Request, call_next):
 
 
 # Helper functions with timing and observability
-@observe()
+# @observe()
 @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=2, max=10))
 @log_time("Embedding generation (query)")
 async def get_embedding(text: str, task_type: str = "retrieval_query") -> List[float]:
@@ -200,7 +200,7 @@ async def get_embedding(text: str, task_type: str = "retrieval_query") -> List[f
         raise
 
 
-@observe()
+# @observe()
 @log_time("Elasticsearch hybrid search")
 async def hybrid_search(
     query: str,
@@ -277,7 +277,7 @@ async def hybrid_search(
         raise
 
 
-@observe()
+# @observe()
 @log_time("Document reranking")
 async def rerank_documents(query: str, documents: List[Dict[str, Any]], top_k: int = 5) -> List[Dict[str, Any]]:
     """Rerank documents using cross-encoder"""
@@ -405,19 +405,19 @@ async def health_check():
         health_status["reranker"] = f"unhealthy: {str(e)}"
         health_status["status"] = "degraded"
     
-    try:
-        if langfuse.auth_check():
-            health_status["langfuse"] = "healthy"
-        else:
-            health_status["langfuse"] = "authentication failed"
-    except Exception as e:
-        health_status["langfuse"] = f"unhealthy: {str(e)}"
+    # try:
+    #     if langfuse.auth_check():
+    #         health_status["langfuse"] = "healthy"
+    #     else:
+    #         health_status["langfuse"] = "authentication failed"
+    # except Exception as e:
+    health_status["langfuse"] = "NA"
     
     return health_status
 
 
 @app.post("/search", response_model=SearchResponse)
-@observe()
+# @observe()
 async def search_endpoint(request: SearchRequest):
     """Search documents using hybrid search and reranking"""
     try:
@@ -469,7 +469,7 @@ async def search_endpoint(request: SearchRequest):
 
 
 @app.post("/chat")
-@observe()
+# @observe()
 async def chat_endpoint(request: ChatRequest):
     """Chat endpoint with RAG"""
     try:

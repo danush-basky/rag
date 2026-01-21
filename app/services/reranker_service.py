@@ -3,7 +3,7 @@ from typing import List, Dict, Any
 from langchain.retrievers.document_compressors import CrossEncoderReranker
 from langchain_community.cross_encoders import HuggingFaceCrossEncoder
 from langchain_core.documents import Document
-from langfuse import observe
+# from langfuse import observe
 
 from app.core.config import get_settings
 from app.core.logging import logger
@@ -20,7 +20,7 @@ class RerankerService:
         cross_encoder = HuggingFaceCrossEncoder(model_name=settings.RERANKER_MODEL)
         self.reranker = CrossEncoderReranker(model=cross_encoder, top_n=settings.TOP_K_RERANK)
     
-    @observe()
+    # @observe()
     @log_time("Reranking")
     async def rerank(
         self,

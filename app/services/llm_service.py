@@ -1,7 +1,7 @@
 import asyncio
 from typing import List, Dict, Optional
 from langfuse.openai import AsyncOpenAI # type: ignore
-from langfuse import observe
+# from langfuse import observe
 
 from app.core.config import get_settings
 from app.core.logging import logger
@@ -43,7 +43,7 @@ class LLMService:
             max_retries=settings.LLM_MAX_RETRIES
         )
     
-    @observe()
+    # @observe()
     @log_time("Query rewriting")
     async def rewrite_query(
         self,
@@ -82,7 +82,7 @@ class LLMService:
             logger.error(f"Query rewriting failed: {e}")
             return query
         
-    @observe()
+    # @observe()
     @log_time("Query rewriting with history")
     async def rewrite_query_with_history(
         self,
@@ -184,7 +184,7 @@ class LLMService:
             return query
 
     
-    @observe()
+    # @observe()
     @log_time("LLM generation")
     async def generate(
         self,
@@ -208,7 +208,7 @@ class LLMService:
             logger.error(f"LLM generation failed: {e}", exc_info=True)
             raise
     
-    @observe()
+    # @observe()
     @log_time("Chat summary generation")
     async def generate_summary(
         self,
