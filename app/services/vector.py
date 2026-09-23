@@ -35,8 +35,8 @@ class VectorService:
 
             embeddings = OpenAIEmbeddings(
                 model=settings.EMBEDDING_MODEL,
-                openai_api_key=settings.LLM_API_KEY,
-                openai_api_base=settings.EMBEDDING_PROVIDER_URL,
+                api_key=settings.LLM_API_KEY,
+                base_url=settings.EMBEDDING_PROVIDER_URL,
                 check_embedding_ctx_length=False,
                 dimensions=settings.EMBEDDING_DIMENSIONS,
                 chunk_size=40,
@@ -82,8 +82,9 @@ class VectorService:
         query: str,
         documents: list[Document],
         top_n: int,
+        score_threshold: float = settings.RERANK_SCORE_THRESHOLD,
     ) -> list[Document]:
-        """Reranks documents via OpenRouter's /api/v1/rerank endpoint."""
+        """Reranks documents via OpenRouter's /api/v1/rerank endpoint and drops low scores."""
         if not documents:
             return []
 
@@ -109,13 +110,20 @@ class VectorService:
 
             reranked_docs: list[Document] = []
             for item in data.get("results", []):
+                score = item.get("relevance_score", 0.0)
+
+                # --- FILTER LOW SCORES ---
+                if score is not None and score < score_threshold:
+                    continue
+
                 idx = item["index"]
                 doc = documents[idx]
-                # Attach relevance score directly to metadata
-                doc.metadata["relevance_score"] = item.get("relevance_score")
+                doc.metadata["relevance_score"] = score
                 reranked_docs.append(doc)
+
             logger.info(
-                f"Reranked {len(reranked_docs)} documents for query '{query[:50]}...'."
+                f"Reranked {len(reranked_docs)}/{len(data.get('results', []))} "
+                f"documents above threshold {score_threshold} for query '{query[:50]}...'."
             )
             return reranked_docs
 
@@ -133,6 +141,7 @@ class VectorService:
         filters: dict[str, Any] | None = None,
         rerank: bool = True,
         reranked_k: int = 8,
+        score_threshold: float = settings.RERANK_SCORE_THRESHOLD,
     ) -> list[Document]:
         """
         Performs similarity search, optionally reranking top results with Qwen.
@@ -149,7 +158,10 @@ class VectorService:
             return []
         if rerank:
             return await self._rerank(
-                query=query, documents=candidates, top_n=reranked_k
+                query=query,
+                documents=candidates,
+                top_n=reranked_k,
+                score_threshold=score_threshold,
             )
         else:
             return candidates[:k]

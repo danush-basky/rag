@@ -22,9 +22,9 @@ class AgentService:
         self.base_llm = ChatOpenAI(
             model=settings.LLM_MODEL,
             base_url=settings.LLM_PROVIDER_URL,
-            api_key=settings.LLM_API_KEY,
+            api_key=settings.LLM_API_KEY, # type: ignore
             temperature=settings.TEMPERATURE,
-            max_tokens=settings.MAX_TOKENS,
+            max_completion_tokens=settings.MAX_TOKENS,
             timeout=settings.LLM_TIMEOUT,
             extra_body={"reasoning": {"effort": "minimal"}},
         )
@@ -49,13 +49,19 @@ class AgentService:
                 if past_context:
                     sys_prompt += f"\n\n--- PREVIOUS SESSION SUMMARY ---\n{past_context}\n---------------------------------"
 
-            return {"messages": [SystemMessage(content=sys_prompt)]}
+            return {"messages": [SystemMessage(content=sys_prompt)]} # type: ignore
         return {}
 
     async def _call_model(self, state: AgentState) -> dict[str, list[AnyMessage]]:
-        response = await self.bound_llm.ainvoke(
-            state["messages"],
+        session_id = state.get("session_id")
+        model = self.bound_llm.bind(
+            extra_body={
+                "reasoning": {"effort": "minimal"},
+                "session_id": session_id,
+            }
         )
+
+        response = await model.ainvoke(state["messages"])
         return {"messages": [response]}
 
     def _build_graph(self):

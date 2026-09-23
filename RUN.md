@@ -1,6 +1,38 @@
-uvicorn app.main:app --host 0.0.0.0 --port 4545 --reload --timeout-keep-alive 120
+python -m app.main
 
 With Session
+
+```JSON
+{
+  "session_id": "jee_physics01",
+  "user_id": "student_123",
+  "assistant_id": "asfasfasf",
+  "messages": [
+    {
+      "role": "user",
+      "content": "The area enclosed between the curves y = x^2 and y = |x| is:\n\n(A) 2/3 sq units\n\n(B) 1/3 sq units\n\n(C) 1/6 sq units\n\n(D) 4/3 sq units"
+    }
+  ],
+  "exam": "JEE",
+  "stream": false
+}
+```
+
+```JSON
+{
+  "session_id": "jee_physics01",
+  "user_id": "student_123",
+  "assistant_id": "asfasfasf",
+  "messages": [
+    {
+      "role": "user",
+      "content": "The area bounded by the parabola y^2 = 8x and the line y = 2x is:\n\n(A) 4/3 sq units\n\n(B) 8/3 sq units\n\n(C) 16/3 sq units\n\n(D) 2/3 sq units"
+    }
+  ],
+  "exam": "JEE",
+  "stream": false
+}
+```
 
 ```JSON
 {
@@ -85,9 +117,8 @@ With Session
       "content": "Two point charges, +Q+Q and -Q−Q, are placed a distance dd apart. What is the electric field magnitude at a point exactly midway between them?"
     }
   ],
-  "stream": false,
-  "top_k": 5,
-  "temperature": 0.3
+  "exam": "JEE",
+  "stream": false
 }
 ```
 
@@ -104,9 +135,8 @@ With Session
       "content": "State the key observation that demonstrates the particle nature of light in the photoelectric effect, and write the Einstein's photoelectric equation."
     }
   ],
-  "stream": false,
-  "top_k": 5,
-  "temperature": 0.3
+  "exam": "JEE",
+  "stream": false
 }
 ```
 
@@ -123,9 +153,8 @@ With Session
      "content": "A steel rod is fixed between two rigid supports at 20^{\\circ}\\text{C}20circtextC. The rod is then heated to 50^{\\circ}\\text{C}50circtextC. If the Young's modulus of steel is YY and its coefficient of linear expansion is \\alphaalpha, derive the expression for the thermal stress developed in the rod."
     }
   ],
-  "stream": false,
-  "top_k": 5,
-  "temperature": 0.3
+  "exam": "JEE",
+  "stream": false
 }
 ```
 

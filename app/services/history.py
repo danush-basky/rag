@@ -59,12 +59,9 @@ class HistoryService:
             api_key=settings.LLM_API_KEY,
             base_url=settings.LLM_PROVIDER_URL,
             temperature=settings.TEMPERATURE,
-            max_tokens=settings.MAX_TOKENS,
+            max_completion_tokens=settings.MAX_TOKENS,
             timeout=settings.LLM_TIMEOUT,
             extra_body={"reasoning": {"effort": "minimal"}},
-        )
-        self.summary_chain = SUMMARY_PROMPT | self.base_llm.with_structured_output(
-            SessionSummaryOutput
         )
 
     async def insert_message(self, message: ChatMessageCreateDB) -> ChatMessageReadDB:
@@ -159,9 +156,7 @@ class HistoryService:
             )
 
             summary_config = {
-                "callbacks": (
-                    [CallbackHandler()] if settings.LANGFUSE_TRACING else []
-                ),
+                "callbacks": ([CallbackHandler()] if settings.LANGFUSE_TRACING else []),
                 "metadata": {
                     "langfuse_session_id": session_id,
                     "langfuse_user_id": user_id,
@@ -169,7 +164,19 @@ class HistoryService:
                 },
                 "tags": ["summary", "background-task"],
             }
-            result: SessionSummaryOutput = await self.summary_chain.ainvoke(
+            # 1. Bind session_id to extra_body dynamically for this session run
+            llm_with_session = self.base_llm.bind(
+                extra_body={
+                    "reasoning": {"effort": "minimal"},
+                    "session_id": session_id,
+                }
+            )
+
+            # 2. Construct the structured output chain with the bound LLM
+            dynamic_chain = SUMMARY_PROMPT | llm_with_session.with_structured_output(
+                SessionSummaryOutput
+            )
+            result: SessionSummaryOutput = await dynamic_chain.ainvoke(
                 {
                     "existing_summary": latest.summary if latest else "None",
                     "new_messages": dialogue,

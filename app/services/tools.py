@@ -15,15 +15,17 @@ class EducationalRetrievalInput(BaseModel):
     query: str = Field(
         ...,
         description=(
-            "Focused keyword-rich search query containing core scientific concepts, "
-            "formulas, theorems, or specific question text to match in textbooks and PYQs."
+            "Clean, keyword-dense concept query. Must contain core topic names, chapter titles, "
+            "theorems, or principles to look up in the syllabus (e.g., 'Application of Integrals area under curve theory', "
+            "'Carnot cycle second law thermodynamics', 'Markovnikov addition mechanism'). "
+            "Do NOT use this for calculating values or solving numerical problems."
         ),
     )
     subject: str | None = Field(
         None,
         description=(
-            "Academic subject category to narrow down search: 'Physics', 'Chemistry', "
-            "'Mathematics', 'Biology'. Leave null if the topic crosses multiple subjects."
+            "The broad discipline: strictly one of 'Physics', 'Chemistry', 'Mathematics', or 'Biology'. "
+            "Pass null if undetermined or interdisciplinary."
         ),
     )
 
@@ -34,22 +36,22 @@ async def retrieve_study_material(
     config: RunnableConfig,
     subject: str | None = None,
 ) -> str:
-    """
-    Search and retrieve authoritative academic study materials, textbook excerpts,
-    derivations, formulas, and past year questions (PYQs) from the vector knowledge base.
+    """Retrieves authoritative textbook theory, definitions, derivations, and conceptual syllabus notes.
 
-    WHEN TO CALL:
-    - Whenever solving or explaining academic concepts, formulas, definitions, or derivations.
-    - When answering textbook questions, standard curriculum problems, or previous year exam questions.
-    - To verify syllabus facts, theorems, or specific numerical problems.
+    STRICT USAGE GATE:
+    ✓ CALL THIS ONLY FOR CONCEPTUAL & THEORETICAL QUERIES:
+      - Explaining a concept, topic, or chapter (e.g., 'What is Application of Integrals?', 'Explain Faraday's laws').
+      - Formal definitions, qualitative principles, and curriculum overviews.
+      - Mathematical and physical derivations (e.g., 'Derive mirror formula').
 
-    HOW TO QUERY:
-    - Extract essential keywords, concepts, or problem statements instead of conversational phrases.
-    - Pass `subject` if explicitly known to avoid cross-subject ambiguity.
-    - Target examination filter is automatically applied from system session configuration.
+    ✗ DO NOT CALL THIS FOR ANY PROBLEM-SOLVING OR NUMERICAL TASKS:
+      - Numerical problems with given values (e.g., 'Find the area between y^2 = 4ax and x^2 = 4ay', 'A block of mass 5kg...').
+      - Step-by-step mathematical calculations, integration evaluations, or algebraic simplification.
+      - Any Multiple Choice Questions (MCQs), whether numerical or theoretical.
+      - Solve all problem-based questions directly from core first principles without calling this tool.
 
-    RETURNS:
-    - XML-formatted matching document excerpts with metadata (source, subject, topic).
+    Returns:
+        Authoritative textbook excerpts, definitions, and theory tagged in XML format.
     """
     configurable = config.get("configurable", {})
     exam = configurable.get("exam")
@@ -68,6 +70,7 @@ async def retrieve_study_material(
             filters=filter_dict if filter_dict else None,
             rerank=settings.RERANKER_ENABLE,
             reranked_k=settings.RERANK_TOP_K,
+            score_threshold=settings.RERANK_SCORE_THRESHOLD,
         )
 
         if not docs:

@@ -1,9 +1,8 @@
 import os
 from functools import lru_cache
+from pathlib import Path
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
-
-from app.utils.prompts import JEE_CONTEXT_PROMPT, JEE_SYS_PROMPT
 
 
 class Settings(BaseSettings):
@@ -22,9 +21,9 @@ class Settings(BaseSettings):
     API_HOST: str = "0.0.0.0"
     API_PORT: int = 4545
 
-    # Prompts
-    JEE_SYSTEM_PROMPT: str = JEE_SYS_PROMPT
-    JEE_CONTEXT_PROMPT: str = JEE_CONTEXT_PROMPT
+    # Prompt File Paths (Overridable via .env)
+    JEE_SYSTEM_PROMPT_PATH: str = "app/prompts/jee_system_prompt.md"
+    JEE_CONTEXT_PROMPT_PATH: str = "app/prompts/jee_context_prompt.md"
 
     # LLM Configuration
     LLM_PROVIDER_URL: str = "https://openrouter.ai/api/v1"
@@ -35,9 +34,7 @@ class Settings(BaseSettings):
     LLM_TIMEOUT: float = 30.0
 
     # Embeddings
-    EMBEDDING_PROVIDER_URL: str = (
-        "https://openrouter.ai/api/v1"
-    )
+    EMBEDDING_PROVIDER_URL: str = "https://openrouter.ai/api/v1"
     EMBEDDING_MODEL: str = "google/gemini-embedding-001"
     EMBEDDING_DIMENSIONS: int = 1024
 
@@ -46,6 +43,7 @@ class Settings(BaseSettings):
     RERANKER_PROVIDER_URL: str = "https://openrouter.ai/api/v1"
     RERANKER_MODEL: str = "qwen/qwen3-reranker-0.6b"
     RERANK_TOP_K: int = 8
+    RERANK_SCORE_THRESHOLD: float = 0.35
 
     # RAG Settings
     CHUNK_SIZE: int = 1200
@@ -65,7 +63,7 @@ class Settings(BaseSettings):
     HISTORY_TABLE: str = "chat_messages_history"
     SUMMARY_TABLE: str = "chat_session_summaries"
 
-    # LangSmith
+    # Langfuse
     LANGFUSE_SECRET_KEY: str
     LANGFUSE_PUBLIC_KEY: str
     LANGFUSE_BASE_URL: str = "https://cloud.langfuse.com"
@@ -82,6 +80,22 @@ class Settings(BaseSettings):
     LOG_FILE: str = "logs/rag_api.log"
 
     @property
+    def JEE_SYSTEM_PROMPT(self) -> str:
+        """Reads system prompt from the configured file path."""
+        path = Path(self.JEE_SYSTEM_PROMPT_PATH)
+        if not path.exists():
+            raise FileNotFoundError(f"System prompt file not found at: {path.resolve()}")
+        return path.read_text(encoding="utf-8").strip()
+
+    @property
+    def JEE_CONTEXT_PROMPT(self) -> str:
+        """Reads context prompt from the configured file path."""
+        path = Path(self.JEE_CONTEXT_PROMPT_PATH)
+        if not path.exists():
+            raise FileNotFoundError(f"Context prompt file not found at: {path.resolve()}")
+        return path.read_text(encoding="utf-8").strip()
+
+    @property
     def asyncpg_url(self) -> str:
         return f"postgresql://{self.DB_USER}:{self.DB_PASSWORD}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
 
@@ -93,8 +107,6 @@ class Settings(BaseSettings):
         if self.LANGFUSE_TRACING and self.LANGFUSE_SECRET_KEY:
             os.environ["LANGFUSE_SECRET_KEY"] = self.LANGFUSE_SECRET_KEY
             os.environ["LANGFUSE_PUBLIC_KEY"] = self.LANGFUSE_PUBLIC_KEY
-            # LANGFUSE_HOST is the current SDK variable; keep BASE_URL for
-            # compatibility with older Langfuse integrations.
             os.environ["LANGFUSE_HOST"] = self.LANGFUSE_BASE_URL
             os.environ["LANGFUSE_BASE_URL"] = self.LANGFUSE_BASE_URL
             os.environ["LANGFUSE_TRACING"] = "true"
