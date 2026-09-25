@@ -27,6 +27,7 @@ class AgentService:
             max_completion_tokens=settings.MAX_TOKENS,
             timeout=settings.LLM_TIMEOUT,
             extra_body={"reasoning": {"effort": "minimal"}},
+            stream_usage=True
         )
         self.bound_llm = self.base_llm.bind_tools(self.tools)
         self.checkpointer = MemorySaver()
