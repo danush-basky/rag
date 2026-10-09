@@ -24,6 +24,9 @@ class Settings(BaseSettings):
     # Prompt File Paths (Overridable via .env)
     JEE_SYSTEM_PROMPT_PATH: str = "app/prompts/jee_system_prompt.md"
     JEE_CONTEXT_PROMPT_PATH: str = "app/prompts/jee_context_prompt.md"
+    RETRIEVE_STUDY_MATERIAL_PROMPT_PATH: str = (
+        "app/prompts/retrieve_study_material_desc.md"
+    )
 
     # LLM Configuration
     LLM_PROVIDER_URL: str = "https://openrouter.ai/api/v1"
@@ -84,7 +87,9 @@ class Settings(BaseSettings):
         """Reads system prompt from the configured file path."""
         path = Path(self.JEE_SYSTEM_PROMPT_PATH)
         if not path.exists():
-            raise FileNotFoundError(f"System prompt file not found at: {path.resolve()}")
+            raise FileNotFoundError(
+                f"System prompt file not found at: {path.resolve()}"
+            )
         return path.read_text(encoding="utf-8").strip()
 
     @property
@@ -92,7 +97,19 @@ class Settings(BaseSettings):
         """Reads context prompt from the configured file path."""
         path = Path(self.JEE_CONTEXT_PROMPT_PATH)
         if not path.exists():
-            raise FileNotFoundError(f"Context prompt file not found at: {path.resolve()}")
+            raise FileNotFoundError(
+                f"Context prompt file not found at: {path.resolve()}"
+            )
+        return path.read_text(encoding="utf-8").strip()
+
+    @property
+    def RETRIEVE_STUDY_MATERIAL_DESC(self) -> str:
+        """Reads tool description from the configured markdown file."""
+        path = Path(self.RETRIEVE_STUDY_MATERIAL_PROMPT_PATH)
+        if not path.exists():
+            raise FileNotFoundError(
+                f"Tool description file not found at: {path.resolve()}"
+            )
         return path.read_text(encoding="utf-8").strip()
 
     @property
