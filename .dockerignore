@@ -1,0 +1,17 @@
+.git
+.github
+.env
+.env.*
+logs
+__pycache__
+*.pyc
+.venv
+venv
+.vscode
+.devcontainer
+.DS_Store
+Output
+Backup
+Data
+test
+RUN.md
