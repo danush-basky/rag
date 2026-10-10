@@ -21,6 +21,10 @@ class Settings(BaseSettings):
     API_HOST: str = "0.0.0.0"
     API_PORT: int = 4545
 
+    # Basic auth for chat, documents, and history
+    BASIC_AUTH_USERNAME: str
+    BASIC_AUTH_PASSWORD: str
+
     # Prompt File Paths (Overridable via .env)
     JEE_SYSTEM_PROMPT_PATH: str = "app/prompts/jee_system_prompt.md"
     JEE_CONTEXT_PROMPT_PATH: str = "app/prompts/jee_context_prompt.md"

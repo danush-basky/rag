@@ -7,6 +7,7 @@ from langgraph.prebuilt import ToolNode, tools_condition
 from app.core.config import get_settings
 from app.models.schemas import AgentState
 from app.services.history import history_service
+from app.services.prompts import prompt_store
 from app.services.tools import retrieve_study_material
 
 settings = get_settings()
@@ -38,12 +39,12 @@ class AgentService:
         messages = state.get("messages", [])
         has_system = any(isinstance(m, SystemMessage) for m in messages)
         if not has_system:
-            sys_prompt = settings.JEE_SYSTEM_PROMPT
+            sys_prompt = prompt_store.system_prompt
             exam = state.get("exam")
             session_id = state.get("session_id")
 
             if exam:
-                sys_prompt += f"\n\n{settings.JEE_CONTEXT_PROMPT.format(exam=exam.strip().upper())}"
+                sys_prompt += f"\n\n{prompt_store.context_prompt.format(exam=exam.strip().upper())}"
 
             if session_id:
                 past_context = await history_service.load_context(session_id)

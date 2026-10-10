@@ -43,16 +43,10 @@ COMMENT ON COLUMN public.chat_session_summaries.updated_at
 -- DROP INDEX IF EXISTS public.idx_session_summaries_created_at;
 
 CREATE INDEX IF NOT EXISTS idx_session_summaries_created_at
-    ON public.chat_session_summaries USING btree
-    (created_at ASC NULLS LAST)
-    WITH (fillfactor=100, deduplicate_items=True)
-    TABLESPACE pg_default;
+    ON public.chat_session_summaries (created_at);
 -- Index: idx_session_summaries_session_id
 
 -- DROP INDEX IF EXISTS public.idx_session_summaries_session_id;
 
 CREATE INDEX IF NOT EXISTS idx_session_summaries_session_id
-    ON public.chat_session_summaries USING btree
-    (session_id COLLATE pg_catalog."default" ASC NULLS LAST)
-    WITH (fillfactor=100, deduplicate_items=True)
-    TABLESPACE pg_default;
+    ON public.chat_session_summaries (session_id);

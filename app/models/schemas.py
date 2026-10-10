@@ -71,6 +71,16 @@ class DocumentDeleteResponse(BaseModel):
     message: str
 
 
+class PromptsResponse(BaseModel):
+    system_prompt: str
+    context_prompt: str
+
+
+class PromptsUpdate(BaseModel):
+    system_prompt: str | None = None
+    context_prompt: str | None = None
+
+
 class RetrievalFilterInput(BaseModel):
     query: str = Field(..., description="Target search query or core academic topic.")
     subject: str | None = Field(
