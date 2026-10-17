@@ -7,6 +7,7 @@ from langchain_core.messages import HumanMessage
 from langfuse.langchain import CallbackHandler
 
 from app.core.config import get_settings
+from app.core.metrics import AGENT_CHAT, track_action
 from app.models.schemas import AgentChatRequest, ChatMessageCreateDB
 from app.services.agent import agent_service
 from app.services.history import history_service
@@ -26,6 +27,7 @@ def parse_content(content: Any) -> str:
 
 
 @router.post("/chat")
+@track_action(AGENT_CHAT)
 async def chat(request: AgentChatRequest, background_tasks: BackgroundTasks):
     user_turns = [m.content for m in request.messages if m.role == "user"]
     if not user_turns:

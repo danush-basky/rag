@@ -1,5 +1,6 @@
 from fastapi import APIRouter, HTTPException
 
+from app.core.metrics import GET_PROMPTS, SET_PROMPTS, track_action
 from app.models.schemas import PromptsResponse, PromptsUpdate
 from app.services.prompts import prompt_store
 
@@ -14,11 +15,13 @@ def _current() -> PromptsResponse:
 
 
 @router.get("", response_model=PromptsResponse)
+@track_action(GET_PROMPTS)
 async def get_prompts() -> PromptsResponse:
     return _current()
 
 
 @router.put("", response_model=PromptsResponse)
+@track_action(SET_PROMPTS)
 async def set_prompts(body: PromptsUpdate) -> PromptsResponse:
     if body.system_prompt is None and body.context_prompt is None:
         raise HTTPException(

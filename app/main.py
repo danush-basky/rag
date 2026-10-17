@@ -7,6 +7,7 @@ from app.api.router import api_router
 from app.core.config import get_settings
 from app.core.database import db_manager
 from app.core.logging import logger
+from app.core.metrics import PrometheusMiddleware
 
 settings = get_settings()
 
@@ -29,6 +30,7 @@ app = FastAPI(
     debug=settings.DEBUG,
 )
 
+app.add_middleware(PrometheusMiddleware)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],

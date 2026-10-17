@@ -1,5 +1,6 @@
 from fastapi import APIRouter, File, Form, HTTPException, UploadFile
 
+from app.core.metrics import DELETE_DOCUMENT, UPLOAD_DOCUMENT, track_action
 from app.models.schemas import DocumentDeleteResponse, DocumentUploadResponse
 from app.services.document import document_service
 
@@ -14,6 +15,7 @@ def sanitize(val: str | None) -> str | None:
 
 
 @router.post("/upload", response_model=DocumentUploadResponse)
+@track_action(UPLOAD_DOCUMENT)
 async def upload_pdf(
     file: UploadFile = File(...),
     exam: str | None = Form(None, description="Target Exam: JEE, NEET, UPSC, CBSE"),
@@ -41,6 +43,7 @@ async def upload_pdf(
 
 
 @router.delete("/{filename}", response_model=DocumentDeleteResponse)
+@track_action(DELETE_DOCUMENT)
 async def delete_pdf(filename: str):
     count = await document_service.delete_document(filename)
     if count == 0:

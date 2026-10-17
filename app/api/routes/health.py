@@ -1,11 +1,13 @@
 from fastapi import APIRouter
 
 from app.core.database import db_manager
+from app.core.metrics import GET_HEALTH_STATUS, track_action
 
 router = APIRouter(tags=["Health"])
 
 
 @router.get("/health")
+@track_action(GET_HEALTH_STATUS)
 async def health_check():
     db_ok = False
     try:
